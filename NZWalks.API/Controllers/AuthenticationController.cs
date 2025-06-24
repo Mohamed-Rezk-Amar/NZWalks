@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repository.IRepository;
+using System.Data;
 
 namespace NZWalks.API.Controllers
 {
@@ -68,11 +69,17 @@ namespace NZWalks.API.Controllers
                 if (checkPasswordResult)
                 {
                     //Get Roles for this user
-                    var roles = await userManager.GetRolesAsync(user);
-                    if (roles != null)
+                    var Roles = await userManager.GetRolesAsync(user);
+                    if (Roles != null)
                     {
-                        var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList());
-                        return Ok("JwtToken : " + jwtToken);
+                        var jwtToken = tokenRepository.CreateJWTToken(user, Roles.ToList());
+                        return Ok( new
+                        {
+                            token = jwtToken,
+                            expiration = DateTime.Now.AddMinutes(15),
+                            username = user.UserName,
+                            roles = Roles
+                        });
                     }
                 }
             }
